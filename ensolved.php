@@ -51,9 +51,21 @@ class Dict
     }
 }
 
+function downloadDict(string $outputPath = null): void
+{
+    $outputPath = $outputPath ?? Settings::$dict;
+    echo "Downloading dictionary to $outputPath..." . PHP_EOL;
+    file_put_contents(
+        $outputPath,
+        file_get_contents('http://enspelled.com/dictionaries/en/en.dic')
+    );
+
+    echo "Done. Saved to $outputPath" . PHP_EOL;
+}
+
 function version(): void
 {
-    echo "Ensolved v1.0.0 - Find solutions for enspelled" . PHP_EOL;
+    echo "Ensolved v1.1.0 - Find solutions for enspelled" . PHP_EOL;
 }
 
 function usage(): void
@@ -63,6 +75,8 @@ function usage(): void
     echo "Flags:" . PHP_EOL;
     echo "-l --letters   Which letters to use to find solutions" . PHP_EOL;
     echo "-d --dict      Sorted dictionary to use with words delimitered with \\r\\n" . PHP_EOL;
+    echo "-g --get       Download the dictonary. By default it will downlaod to `./en.dic`," . PHP_EOL;
+    echo "               but you can change destination via passing an arg here or to -d flag " . PHP_EOL;
     echo "-h --help      Show this usage" . PHP_EOL;
     echo "-v --version   Show version" . PHP_EOL;
 }
@@ -91,6 +105,17 @@ function handle_args(): bool
 
             $i++;
             Settings::$dict = $argv[$i];
+        }
+
+        else if (in_array($argv[$i], ['-g', '--get'])) {
+            if ($i >= $argc - 1) {
+                downloadDict();
+                return false;
+            }
+
+            $i++;
+            downloadDict($argv[$i]);
+            return false;
         }
 
         else if (in_array($argv[$i], ['-h', '--help'])) {
