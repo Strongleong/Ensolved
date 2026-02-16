@@ -1,6 +1,6 @@
 # Ensolved
 
-This is CLI app for soliving (Enspelled game)[https://enspelled.com].
+This is CLI app for soliving [Enspelled game](https://enspelled.com).
 
 ## Usage:
 
