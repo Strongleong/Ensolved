@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+// Class here is just to not use arrays
 class Settings
 {
     static public string $letters = '';
