@@ -5,7 +5,7 @@ declare(strict_types=1);
 class Settings
 {
     static public string $letters = '';
-    static public string $dict    = './en.dic';
+    static public string $wordlist    = './en.dic';
 
     static public function validate(): bool
     {
@@ -20,7 +20,7 @@ class Settings
            $errors[] = "ERR: Letters must consist only of letters";
        }
 
-       if (!file_exists(self::$dict)) {
+       if (!file_exists(self::$wordlist)) {
            $errors[] = "ERR: Dictionary file is not found";
        }
 
@@ -32,29 +32,29 @@ class Settings
     }
 }
 
-class Dict
+class Wordlist
 {
     static private $content = null;
 
     static public function getContent(): array
     {
         if (self::$content === null) {
-            self::$content = explode("\r\n", file_get_contents(Settings::$dict));
+            self::$content = explode("\r\n", file_get_contents(Settings::$wordlist));
         }
 
         return self::$content;
     }
 
-    static public function isInDict(string $word): bool
+    static public function isValidWord(string $word): bool
     {
         return in_array($word, self::getContent());
     }
 }
 
-function downloadDict(string $outputPath = null): void
+function downloadWordlist(string $outputPath = null): void
 {
-    $outputPath = $outputPath ?? Settings::$dict;
-    echo "Downloading dictionary to $outputPath..." . PHP_EOL;
+    $outputPath = $outputPath ?? Settings::$wordlist;
+    echo "Downloading wordlist to $outputPath..." . PHP_EOL;
     file_put_contents(
         $outputPath,
         file_get_contents('http://enspelled.com/dictionaries/en/en.dic')
@@ -74,8 +74,8 @@ function usage(): void
     echo "Usage: php ./ensolved.php -l IYDDRRALT [-d ./en.dic -h -v]" . PHP_EOL;
     echo "Flags:" . PHP_EOL;
     echo "-l --letters   Which letters to use to find solutions" . PHP_EOL;
-    echo "-d --dict      Sorted dictionary to use with words delimitered with \\r\\n" . PHP_EOL;
-    echo "-g --get       Download the dictonary. By default it will downlaod to `./en.dic`," . PHP_EOL;
+    echo "-w --wordlist  Sorted dictionary to use with words delimitered with \\r\\n" . PHP_EOL;
+    echo "-g --get       Download the wordlist. By default it will downlaod to `./en.dic`," . PHP_EOL;
     echo "               but you can change destination via passing an arg here or to -d flag " . PHP_EOL;
     echo "-h --help      Show this usage" . PHP_EOL;
     echo "-v --version   Show version" . PHP_EOL;
@@ -97,24 +97,24 @@ function handle_args(): bool
             Settings::$letters = strtolower($argv[$i]);
         }
 
-        else if (in_array($argv[$i], ['-d', '--dict'])) {
+        else if (in_array($argv[$i], ['-w', '--wordlist'])) {
             if ($i >= $argc - 1) {
                 fprintf(STDERR, "ERR: argument " . $argv[$i] . " must have value");
                 return false;
             }
 
             $i++;
-            Settings::$dict = $argv[$i];
+            Settings::$wordlist = $argv[$i];
         }
 
         else if (in_array($argv[$i], ['-g', '--get'])) {
             if ($i >= $argc - 1) {
-                downloadDict();
+                downloadWordlist();
                 return false;
             }
 
             $i++;
-            downloadDict($argv[$i]);
+            downloadWordlist($argv[$i]);
             return false;
         }
 
@@ -163,7 +163,7 @@ function main()
         $topScore = 0;
         $bestWord = '';
 
-        foreach (Dict::getContent() as $word) {
+        foreach (Wordlist::getContent() as $word) {
             $newScore = scoreWord($word, $lettersI);
 
             if ($newScore > $topScore) {
