@@ -65,7 +65,7 @@ function downloadWordlist(string $outputPath = null): void
 
 function version(): void
 {
-    echo "Ensolved v1.1.0 - Find solutions for enspelled" . PHP_EOL;
+    echo "Ensolved v2.0.0 - Find solutions for enspelled" . PHP_EOL;
 }
 
 function usage(): void
