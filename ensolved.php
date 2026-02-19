@@ -176,7 +176,6 @@ function main()
         echo $bestWord . PHP_EOL;
         $lettersI += $topScore - 1;
         $attempt++;
-        echo $lettersI . PHP_EOL;
     }
 
     return 0;
