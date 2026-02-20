@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 
 declare(strict_types=1);
@@ -22,7 +23,7 @@ class Settings
        }
 
        if (!file_exists(self::$wordlist)) {
-           $errors[] = "ERR: Dictionary file is not found";
+           $errors[] = "ERR: Dictionary file is not found (try to download it with -g flag)";
        }
 
        foreach ($errors as $error) {
@@ -86,6 +87,11 @@ function handle_args(): bool
 {
     global $argv;
     $argc = count($argv);
+
+    if ($argc === 1) {
+        usage();
+        return false;
+    }
 
     for ($i = 0; $i < $argc; $i++) {
         if (in_array($argv[$i], ['-l', '--letters'])) {
