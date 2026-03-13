@@ -83,7 +83,7 @@ function usage(): void
     echo "-v --version   Show version" . PHP_EOL;
 }
 
-function handle_args(): bool
+function handleArgs(): bool
 {
     global $argv;
     $argc = count($argv);
@@ -139,14 +139,43 @@ function handle_args(): bool
     return true;
 }
 
+function isTermSupportColors(): bool
+{
+    if (getenv('NO_COLOR') !== false) {
+        return false;
+    }
+
+    if (!function_exists('stream_isatty') || !stream_isatty(STDOUT)) {
+        return false;
+    }
+
+    if (DIRECTORY_SEPARATOR === '\\') {
+        return getenv('ANSICON') !== false
+            || getenv('WT_SESIION') !== false
+            || getenv('ConEmuANSI') === 'ON'
+            || getenv('TERM_PROGRAM') === 'vscode';
+    }
+
+    return true;
+}
+
 function scoreWord(string $word, int $lettersI = 0) {
     $letters  = str_split(Settings::$letters);
+    $wordArr = str_split($word);
+
     $score    = 0;
     $wordI    = 0;
     $wordLen  = strlen($word);
 
     while ($wordI < $wordLen && $lettersI < 9) {
-        if ($letters[$lettersI] === $word[$wordI]) {
+        if ($letters[$lettersI] === $wordArr[$wordI]) {
+
+            if (isTermSupportColors()) {
+                $wordArr[$wordI] = "\033[31m" . $wordArr[$wordI] . "\033[0m";
+            } else {
+                $wordArr[$wordI] = strtoupper($wordArr[$wordI]);
+            }
+
             $score++;
             $lettersI++;
         }
@@ -154,12 +183,12 @@ function scoreWord(string $word, int $lettersI = 0) {
         $wordI++;
     }
 
-    return $score;
+    return [ $score, implode('', $wordArr) ];
 }
 
 function main()
 {
-    if (!(handle_args() && Settings::validate())) {
+    if (!(handleArgs() && Settings::validate())) {
         return 1;
     }
 
@@ -171,16 +200,16 @@ function main()
         $bestWord = '';
 
         foreach (Wordlist::getContent() as $word) {
-            $newScore = scoreWord($word, $lettersI);
+            [$newScore, $newWord] = scoreWord($word, $lettersI);
 
             if ($newScore > $topScore) {
                 $topScore = $newScore;
-                $bestWord = $word;
+                $bestWord = $newWord;
             }
         }
 
         echo $bestWord . PHP_EOL;
-        $lettersI += $topScore - 1;
+        $lettersI += $topScore;
         $attempt++;
     }
 
